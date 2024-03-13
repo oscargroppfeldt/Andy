@@ -30,14 +30,13 @@ class ScheduleCog(commands.Cog):
 	async def on_message(self, msg):
 		if msg.author == self.bot.user:
 			return
-		print(f"Message from {msg.author}: {msg.content}")
 
 
 	@commands.command()
 	async def start(self, ctx):
 		if self.bot_ctx is None:
 			self.bot_ctx = ctx
-		await ctx.channel.send(f"Bot init: {datetime.datetime.now()}")
+		await ctx.channel.send(f"Bot started with schedule url: {self.schedule_url}")
 
 
 	@commands.command()
@@ -63,13 +62,13 @@ class ScheduleCog(commands.Cog):
 		self.games = utils.get_schedule(self.schedule_url)
 		self.games.sort(key=lambda x: x[1])
 
-	@tasks.loop(hours=24)
+	@tasks.loop(hours=18)
 	async def check_schedule(self):
 		next_game = self.games[0]
 		if next_game[1] < datetime.datetime.now() + datetime.timedelta(days=5):
 			await self.send_game_info(next_game, self.bot_ctx)
 		
-	@tasks.loop(hours=24)
+	@tasks.loop(hours=12)
 	async def check_team(self):
 		next_game = self.games[0]
 		if next_game[1] < datetime.datetime.now() + datetime.timedelta(days=3):
@@ -77,6 +76,7 @@ class ScheduleCog(commands.Cog):
 		
 	async def send_game_info(self, next_game, bot_ctx):
 		message = "___Match!___\n"
+		message += "<@everyone>\n\n"
 		game_name = next_game[0]
 		game_datetime_str = next_game[1].strftime("%Y-%m-%d %H:%M")
 		message += f"{game_name:<30}{game_datetime_str:<25}\n"
