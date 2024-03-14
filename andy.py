@@ -17,7 +17,7 @@ class ScheduleCog(commands.Cog):
 		self.games = []
 		self.current_msg_ctx = None
 		self.bot_ctx = None
-		self.games = utils.get_schedule(self.schedule_url)
+		self.games = None
 		self.games.sort(key=lambda x: x[1])
 		self.message_pinned = False
 
@@ -36,6 +36,7 @@ class ScheduleCog(commands.Cog):
 	async def start(self, ctx):
 		if self.bot_ctx is None:
 			self.bot_ctx = ctx
+		self.games = utils.get_schedule(self.schedule_url)
 		self.update_schedule.start()
 		self.check_schedule.start()
 		await ctx.channel.send(f"Bot started with schedule url: {self.schedule_url}")
