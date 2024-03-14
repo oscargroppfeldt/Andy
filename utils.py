@@ -15,4 +15,5 @@ def get_schedule(url):
 		td_tags = tr_tag.findAll('td')
 		games.append((td_tags[0].text.strip(), datetime.datetime.strptime(td_tags[1].text.strip(), "%Y-%m-%d %H:%M")))
 
+	print("Games generated at ", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 	return games
