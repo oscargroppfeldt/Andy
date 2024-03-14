@@ -114,7 +114,7 @@ class ScheduleCog(commands.Cog):
 		for reaction in reactions:
 			if reaction.emoji == emoji_thumbs_up:
 				available_players = [user for user in reaction.users()]
-		
+				available_players.remove(self.bot.user)
 		if len(available_players) < 5:
 			await bot_ctx.channel.send("Vi saknar {5 - len(available_players)} spelare")
 		else:
