@@ -61,8 +61,10 @@ class ScheduleCog(commands.Cog):
 	
 	@tasks.loop(hours=168)
 	async def update_schedule(self):
+		games_remaining = len(self.games)
 		self.games = utils.get_schedule(self.schedule_url)
 		self.games.sort(key=lambda x: x[1])
+		self.games = self.games[games_remaining:]
 
 	@tasks.loop(hours=16)
 	async def check_schedule(self):
@@ -82,13 +84,14 @@ class ScheduleCog(commands.Cog):
 		
 	async def send_game_info(self, next_game, bot_ctx):
 		message = "___Match!___\n"
-		message += "<@everyone>\n\n"
+		message += "@everyone"
 		game_name = next_game[0]
-		game_datetime_str = next_game[1].strftime("%Y-%m-%d %H:%M")
+		game_datetime_str = next_game[1].strftime("%A %-d/%m %H:%M")
 		message += f"{game_name:<30}{game_datetime_str:<25}\n"
 		emoji_thumb_up = '\N{THUMBS UP SIGN}'
 		emoji_thumb_down = '\N{THUMBS DOWN SIGN}'
-		message += f"\n\nReagera med {emoji_thumb_up} om ni vill lira"
+		message += f"Reagera med {emoji_thumb_up} om ni vill lira"
+		message += f"Reagera med {emoji_thumb_down} om ni är lite cringe"
 		self.current_msg_ctx = await bot_ctx.channel.send(message)
 		await self.current_msg_ctx.add_reaction(emoji_thumb_up)
 		await self.current_msg_ctx.add_reaction(emoji_thumb_down)
