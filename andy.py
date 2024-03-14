@@ -36,6 +36,8 @@ class ScheduleCog(commands.Cog):
 	async def start(self, ctx):
 		if self.bot_ctx is None:
 			self.bot_ctx = ctx
+		self.update_schedule.start()
+		self.check_schedule.start()
 		await ctx.channel.send(f"Bot started with schedule url: {self.schedule_url}")
 
 
@@ -62,14 +64,18 @@ class ScheduleCog(commands.Cog):
 		self.games = utils.get_schedule(self.schedule_url)
 		self.games.sort(key=lambda x: x[1])
 
-	@tasks.loop(hours=18)
+	@tasks.loop(hours=16)
 	async def check_schedule(self):
+		if self.message_pinned:
+			return
 		next_game = self.games[0]
 		if next_game[1] < datetime.datetime.now() + datetime.timedelta(days=5):
 			await self.send_game_info(next_game, self.bot_ctx)
 		
 	@tasks.loop(hours=12)
 	async def check_team(self):
+		if not self.message_pinned:
+			return
 		next_game = self.games[0]
 		if next_game[1] < datetime.datetime.now() + datetime.timedelta(days=3):
 			await self.generate_team(self.bot_ctx)
