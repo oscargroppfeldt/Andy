@@ -15,7 +15,7 @@ class ScheduleCog(commands.Cog):
 		self.bot = bot
 		self.schedule_url = "https://esparven.se/none/Team/Index/165"
 		self.games = utils.get_schedule(self.schedule_url)
-		self.current_msg_ctx = None
+		self.current_msg = None
 		self.bot_ctx = None
 		self.message_pinned = False
 
@@ -71,9 +71,14 @@ class ScheduleCog(commands.Cog):
 		self.games = self.games[(total_games - games_remaining):]
 		await self.bot_ctx.channel.send("Updated schedule")
 
-	@tasks.loop(hours=16)
+	@tasks.loop(hours=12)
 	async def check_schedule(self):
 		if self.message_pinned:
+			return
+		for idx, game in enumerate(self.games):
+			if game[1] > datetime.datetime.now():
+				self.games = self.games[idx:]
+		if len(self.games) == 0:
 			return
 		next_game = self.games[0]
 		if next_game[1] < datetime.datetime.now() + datetime.timedelta(days=5):
@@ -97,19 +102,18 @@ class ScheduleCog(commands.Cog):
 		emoji_thumb_down = '\N{THUMBS DOWN SIGN}'
 		message += f"Reagera med {emoji_thumb_up} om ni vill lira\n\n"
 		message += f"Reagera med {emoji_thumb_down} om ni är lite cringe"
-		self.current_msg_ctx = await bot_ctx.channel.send(message)
-		await self.current_msg_ctx.add_reaction(emoji_thumb_up)
-		await self.current_msg_ctx.add_reaction(emoji_thumb_down)
-		await self.current_msg_ctx.pin()
+		self.current_msg = await bot_ctx.channel.send(message)
+		await self.current_msg.add_reaction(emoji_thumb_up)
+		await self.current_msg.add_reaction(emoji_thumb_down)
+		await self.current_msg.pin()
 		self.message_pinned = True
 
 
 	async def generate_team(self, bot_ctx):
-		msg = await self.current_msg_ctx.fetch_message(self.current_msg_ctx.id)
-		await self.current_msg_ctx.unpin()
+		await self.current_msg.unpin()
 
 		available_players = []
-		reactions = msg.reactions
+		reactions = self.current_msg.reactions
 		emoji_thumbs_up = '\N{THUMBS UP SIGN}'
 		for reaction in reactions:
 			if reaction.emoji == emoji_thumbs_up:
