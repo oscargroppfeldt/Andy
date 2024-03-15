@@ -122,7 +122,7 @@ class ScheduleCog(commands.Cog):
 		if len(available_players) < 5:
 			await bot_ctx.channel.send("Vi saknar {5 - len(available_players)} spelare")
 		else:
-			players = random.choice(available_players)
+			players = random.sample(available_players, 5)
 			await bot_ctx.channel.send(f"{players[0].mention}, {players[1].mention}, {players[2].mention}, {players[3].mention} och {players[4].mention} lirar")
 		self.message_pinned = False
 		self.games = self.games[1:]
