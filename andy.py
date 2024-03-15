@@ -82,7 +82,7 @@ class ScheduleCog(commands.Cog):
 			return
 		next_game = self.games[0]
 		if next_game[1] < datetime.datetime.now() + datetime.timedelta(days=5):
-			await self.send_game_info(next_game, self.bot_ctx)
+			await self.send_game_info(next_game)
 		
 	@tasks.loop(hours=12)
 	async def check_team(self):
@@ -90,9 +90,9 @@ class ScheduleCog(commands.Cog):
 			return
 		next_game = self.games[0]
 		if next_game[1] < datetime.datetime.now() + datetime.timedelta(days=3):
-			await self.generate_team(self.bot_ctx)
+			await self.generate_team()
 		
-	async def send_game_info(self, next_game, bot_ctx):
+	async def send_game_info(self, next_game):
 		message = "___Match!___\n"
 		message += "@everyone\n"
 		game_name = next_game[0]
@@ -102,14 +102,14 @@ class ScheduleCog(commands.Cog):
 		emoji_thumb_down = '\N{THUMBS DOWN SIGN}'
 		message += f"Reagera med {emoji_thumb_up} om ni vill lira\n\n"
 		message += f"Reagera med {emoji_thumb_down} om ni är lite cringe"
-		self.current_msg = await bot_ctx.channel.send(message)
+		self.current_msg = await self.bot_ctx.channel.send(message)
 		await self.current_msg.add_reaction(emoji_thumb_up)
 		await self.current_msg.add_reaction(emoji_thumb_down)
 		await self.current_msg.pin()
 		self.message_pinned = True
 
 
-	async def generate_team(self, bot_ctx):
+	async def generate_team(self):
 		await self.current_msg.unpin()
 
 		available_players = []
@@ -120,10 +120,10 @@ class ScheduleCog(commands.Cog):
 				available_players = [user for user in reaction.users()]
 				available_players.remove(self.bot.user)
 		if len(available_players) < 5:
-			await bot_ctx.channel.send("Vi saknar {5 - len(available_players)} spelare")
+			await self.bot_ctx.channel.send("Vi saknar {5 - len(available_players)} spelare")
 		else:
 			players = random.sample(available_players, 5)
-			await bot_ctx.channel.send(f"{players[0].mention}, {players[1].mention}, {players[2].mention}, {players[3].mention} och {players[4].mention} lirar")
+			await self.bot_ctx.channel.send(f"{players[0].mention}, {players[1].mention}, {players[2].mention}, {players[3].mention} och {players[4].mention} lirar")
 		self.message_pinned = False
 		self.games = self.games[1:]
 
