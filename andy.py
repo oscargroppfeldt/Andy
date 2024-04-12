@@ -120,7 +120,7 @@ class ScheduleCog(commands.Cog):
 				available_players = [user for user in reaction.users()]
 				available_players.remove(self.bot.user)
 		if len(available_players) < 5:
-			await self.bot_ctx.channel.send("Vi saknar {5 - len(available_players)} spelare")
+			await self.bot_ctx.channel.send(f"Vi saknar {5 - len(available_players)} spelare")
 		else:
 			players = random.sample(available_players, 5)
 			await self.bot_ctx.channel.send(f"{players[0].mention}, {players[1].mention}, {players[2].mention}, {players[3].mention} och {players[4].mention} lirar")
